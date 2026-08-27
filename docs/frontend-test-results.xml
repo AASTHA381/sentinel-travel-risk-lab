@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="5" failures="0" errors="0" time="0.0060785">
+    <testsuite name="src/api.test.ts" timestamp="2026-08-23T19:55:51.769Z" hostname="karan_gpu" tests="3" failures="0" errors="0" skipped="0" time="0.0038121">
+        <testcase classname="src/api.test.ts" name="formatValidationIssue &gt; turns model-level booking history errors into plain language" time="0.0020145">
+        </testcase>
+        <testcase classname="src/api.test.ts" name="formatValidationIssue &gt; humanizes field names when no explicit label exists" time="0.0002371">
+        </testcase>
+        <testcase classname="src/api.test.ts" name="formatValidationIssue &gt; uses a safe fallback for malformed validation responses" time="0.0001678">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/views/AssessmentView.test.ts" timestamp="2026-08-23T19:55:51.773Z" hostname="karan_gpu" tests="2" failures="0" errors="0" skipped="0" time="0.0022664">
+        <testcase classname="src/views/AssessmentView.test.ts" name="assessment view helpers &gt; identifies a loaded scenario and marks edited values as custom" time="0.0010959">
+        </testcase>
+        <testcase classname="src/views/AssessmentView.test.ts" name="assessment view helpers &gt; formats useful history rates and impossible zero-history values" time="0.0001811">
+        </testcase>
+    </testsuite>
+</testsuites>

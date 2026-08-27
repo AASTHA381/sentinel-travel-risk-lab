@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "travel-fraud-lab-api"
+version = "0.1.0"
+description = "Explainable travel booking risk assessment API"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "joblib>=1.4,<2",
+    "numpy>=1.26,<3",
+    "pandas>=2.2,<3",
+    "pydantic>=2.10,<3",
+    "scikit-learn>=1.5,<2",
+    "uvicorn[standard]>=0.34,<1",
+    "xgboost>=2.1,<4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "httpx>=0.28,<1",
+    "pytest>=8,<9",
+]
+integrations = [
+    "google-genai>=1.0,<2",
+    "neo4j>=6,<7",
+]
+notebook = [
+    "ipykernel>=6,<8",
+    "nbconvert>=7,<8",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
