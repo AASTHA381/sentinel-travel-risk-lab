@@ -1,13 +1,27 @@
-# Sentinel Travel Risk Lab
+# Sentinel — Travel Booking Risk Assessment
 
-Sentinel is a working research prototype for explainable travel-booking risk assessment. It evaluates two separate risks:
+> Explainable AI for payment fraud & inventory abuse detection in travel bookings.
 
-1. payment fraud, such as use of a compromised payment token;
-2. inventory abuse, such as repeated bulk holds followed by late cancellations.
+[![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.141-green?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://reactjs.org/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-3.4-orange)](https://xgboost.readthedocs.io/)
+[![License](https://img.shields.io/badge/License-Research_Prototype-lightgrey)](LICENSE)
 
-The application combines XGBoost predictions, transparent policy rules, form-interaction telemetry, a relationship graph, and an optional Gemini analyst brief. It recommends **approve**, **manual review**, or **block**. It does not make production decisions.
+---
 
-> **Evidence boundary:** the included 15,000-row dataset is synthetic and reproducibly generated. Reported metrics verify the implementation on generated patterns; they are not claims about real travel-industry performance.
+## Overview
+
+Sentinel is a full-stack research prototype that screens travel-agent bookings for two distinct fraud vectors:
+
+1. **Payment Fraud** — Use of a compromised payment token or stolen credentials
+2. **Inventory Abuse** — Repeated bulk holds followed by late cancellations
+
+It combines XGBoost predictions, transparent policy rules, form-interaction telemetry, a relationship graph, and an optional Gemini AI analyst brief. It recommends **Approve**, **Manual Review**, or **Block** — but does not make autonomous production decisions.
+
+> **Evidence boundary:** The included 15,000-row dataset is synthetic and reproducibly generated (seed `20260823`). Reported metrics verify implementation on generated patterns; they are not claims about real travel-industry performance.
+
+---
 
 ## Architecture
 
@@ -28,120 +42,173 @@ flowchart LR
     BRIEF -. optional .-> GEMINI[Gemini]
 ```
 
-## Included Features
+---
 
-- **Gatekeeper:** separate payment-fraud and inventory-abuse XGBoost models plus policy guardrails.
-- **Shop Assistant:** optional live capture of elapsed form time, paste count, and pointer events.
-- **Detective:** interactive relationship graph with a labeled offline dataset and optional Neo4j provider.
-- **Analyst assistant:** evidence-only local brief and optional Gemini generation that excludes booking and agent IDs.
-- **Human review:** session case queue populated by completed assessments.
-- **Evaluation:** chronological holdout, precision, recall, PR-AUC, ROC-AUC, false-positive rate, and confusion matrices.
+## Features
+
+| Module | Description |
+|---|---|
+| 🔐 **Gatekeeper** | Separate payment-fraud and inventory-abuse XGBoost models + auditable policy guardrails |
+| 📋 **Shop Assistant** | Optional live capture of elapsed form time, paste count, and pointer events |
+| 🔍 **Detective** | Interactive entity relationship graph — offline demo or live Neo4j |
+| 🤖 **Analyst Assistant** | Evidence-only local brief + optional Gemini generation (no PII sent) |
+| 📁 **Human Review Queue** | Session case queue populated by completed assessments |
+| 📊 **Evaluation Dashboard** | Chronological holdout · Precision · Recall · PR-AUC · ROC-AUC · Confusion matrices |
+
+---
+
+## Measured Synthetic Test Results
+
+| Model | Precision | Recall | PR-AUC | False-Positive Rate |
+|---|---:|---:|---:|---:|
+| Payment Fraud | 0.7571 | 0.3706 | 0.4858 | 0.0082 |
+| Inventory Abuse | 0.8229 | 0.6320 | 0.6714 | 0.0172 |
+
+> The payment model misses many generated fraud cases at threshold `0.50`. This limitation is intentionally visible in the application.
+
+---
 
 ## Requirements
 
 - Python 3.11+
 - Node.js 20+
 - npm 10+
+- macOS: `brew install libomp` (required for XGBoost)
 
-## Setup
+---
 
-From the repository root in PowerShell:
+## Quick Start
 
-```powershell
-python -m pip install -e ".\backend[dev,notebook]"
-Set-Location frontend
-npm install
-Set-Location ..
+### 1. Install Dependencies
+
+```bash
+# Backend
+pip3 install -e "./backend[dev,notebook]"
+
+# Frontend
+cd frontend && npm install && cd ..
 ```
 
-To install optional Gemini and Neo4j clients:
+### 2. Train Models (optional — pre-trained artifacts included)
 
-```powershell
-python -m pip install -e ".\backend[integrations]"
+```bash
+cd backend && python3 -m ml.train && cd ..
 ```
 
-Do not commit API keys or database passwords. Copy values from [backend/.env.example](backend/.env.example) into environment variables only when those integrations are required.
+### 3. Run the Application
 
-## Train Reproducibly
-
-```powershell
-Set-Location backend
-python -m ml.train
-Set-Location ..
+**Terminal 1 — Backend:**
+```bash
+cd backend
+python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-This regenerates the disclosed dataset when absent, trains both models with seed `20260823`, saves JSON model artifacts, and writes measured test metrics to [backend/artifacts/metadata.json](backend/artifacts/metadata.json).
-
-## Run The Application
-
-Terminal 1:
-
-```powershell
-Set-Location backend
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
-```
-
-Terminal 2:
-
-```powershell
-Set-Location frontend
+**Terminal 2 — Frontend:**
+```bash
+cd frontend
 npm run dev -- --host 127.0.0.1
 ```
 
-Open `http://127.0.0.1:5173`.
+Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**
+
+---
 
 ## Optional Integrations
 
-### Gemini
+### Gemini AI
+Set `GEMINI_API_KEY` (and optionally `GEMINI_MODEL`, defaults to `gemini-3.7-flash`).  
+Only scores and evidence labels are sent — never booking or agent IDs.  
+Falls back to `offline_fallback` when unavailable.
 
-Set `GEMINI_API_KEY` and optionally `GEMINI_MODEL`. The implementation follows Google's current `google-genai` Interactions API and defaults to `gemini-3.7-flash`. Only scores and evidence labels are sent. When unavailable, the response provider becomes `offline_fallback`; it never pretends generation succeeded.
+### Neo4j Graph Database
+Set `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, and optionally `NEO4J_DATABASE`.  
+Falls back to `offline_demo` on connection failure — never returns invented data.
 
-### Neo4j
+Copy values from [backend/.env.example](backend/.env.example). Do not commit API keys.
 
-Set `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, and optionally `NEO4J_DATABASE`. Agent, device, payment, and IP nodes should expose `id`, `label`, `kind`, and `status` properties. Without a working connection, the graph provider is explicitly `offline_demo`.
+---
 
-## Verification
+## Project Structure
 
-The complete normal-case, edge-case, screenshot, and model-improvement record is in [TESTS.md](TESTS.md).
-
-```powershell
-Set-Location backend
-python -m pytest -q
-Set-Location ..\frontend
-npm test
-npm run build
-npm run lint
+```
+sentinel-travel-risk-lab/
+├── backend/
+│   ├── app/              # FastAPI application
+│   │   ├── main.py       # API routes & WebSocket
+│   │   ├── model_service.py  # XGBoost model loading
+│   │   ├── features.py   # Feature engineering
+│   │   ├── risk.py       # Risk scoring & policy rules
+│   │   ├── detective.py  # Graph relationship provider
+│   │   └── briefing.py   # Analyst brief generator
+│   ├── ml/               # Training pipeline
+│   │   ├── generate_data.py  # Synthetic data generator
+│   │   └── train.py      # Model training & evaluation
+│   ├── artifacts/        # Pre-trained model JSON + metadata
+│   ├── data/             # Synthetic booking dataset (15k rows)
+│   └── tests/            # pytest test suite
+├── frontend/
+│   ├── src/
+│   │   ├── views/        # AssessmentView · CasesView · ModelView · NetworkView
+│   │   ├── components/   # Inputs · ResultPanel
+│   │   ├── api.ts        # Backend API client
+│   │   └── assessment.ts # Assessment logic
+│   └── index.html
+├── docs/
+│   ├── PRD.md            # Product Requirements Document ← this file
+│   ├── architecture.md   # Full system architecture & sequence diagrams
+│   ├── final_report.md   # Implementation & evaluation report
+│   ├── presentation.md   # Slide-ready presentation
+│   ├── demo_script.md    # Five-minute live demonstration guide
+│   └── test-screenshots/ # Screenshot evidence
+├── notebooks/
+│   └── model_evaluation.executed.ipynb  # Executed evaluation notebook
+├── TESTS.md              # Visual and automated test dossier
+└── travel_fraud_research_roadmap.md
 ```
 
-Execute the notebook:
+---
 
-```powershell
-Set-Location ..
-python -m jupyter nbconvert --to notebook --execute notebooks/model_evaluation.ipynb --output model_evaluation.executed.ipynb --output-dir notebooks --ExecutePreprocessor.kernel_name=travel-fraud-lab
+## Running Tests
+
+```bash
+# Backend unit tests
+cd backend && python3 -m pytest -q && cd ..
+
+# Frontend tests + build + lint
+cd frontend && npm test && npm run build && npm run lint
 ```
 
-## Measured Synthetic Test Results
+---
 
-| Model | Precision | Recall | PR-AUC | False-positive rate |
-|---|---:|---:|---:|---:|
-| Payment fraud | 0.7571 | 0.3706 | 0.4858 | 0.0082 |
-| Inventory abuse | 0.8229 | 0.6320 | 0.6714 | 0.0172 |
+## Documentation
 
-The payment model misses many generated fraud cases at threshold `0.50`. That limitation is intentionally visible in the application and report.
+| Document | Description |
+|---|---|
+| [docs/PRD.md](docs/PRD.md) | Product Requirements Document — features, goals, constraints |
+| [docs/architecture.md](docs/architecture.md) | Complete architecture, sequence diagrams, feature guide |
+| [docs/final_report.md](docs/final_report.md) | Implementation and evaluation report |
+| [docs/presentation.md](docs/presentation.md) | Slide-ready presentation |
+| [docs/demo_script.md](docs/demo_script.md) | Five-minute live demonstration |
+| [TESTS.md](TESTS.md) | Visual and automated test dossier with screenshot evidence |
+| [notebooks/model_evaluation.executed.ipynb](notebooks/model_evaluation.executed.ipynb) | Executed evaluation notebook |
 
-## Submission Files
+---
 
-- [TESTS.md](TESTS.md): visual and automated test dossier with screenshot evidence
-- [docs/architecture.md](docs/architecture.md): complete architecture, sequence diagrams, feature guide, and modeling explanation
-- [docs/final_report.md](docs/final_report.md): implementation and evaluation report
-- [docs/presentation.md](docs/presentation.md): slide-ready presentation
-- [docs/demo_script.md](docs/demo_script.md): five-minute live demonstration
-- [notebooks/model_evaluation.executed.ipynb](notebooks/model_evaluation.executed.ipynb): executed evaluation notebook
-- [travel_fraud_research_roadmap.md](travel_fraud_research_roadmap.md): original research strategy with an evidence notice
+## Safety & Limitations
 
-## Safety And Limitations
+> ⚠️ This is a research prototype and must **not** be used for production decisions without:
 
-- Never store raw card numbers; use payment-provider tokens.
-- Geography, time of day, or telemetry must never independently prove fraud.
-- SHAP contributions explain model influence, not causation or guilt.
-- A real deployment requires lawful outcome data, leakage analysis, calibration, subgroup testing, retention rules, access control, drift monitoring, and human appeal processes.
+- Lawful outcome data from real bookings
+- Leakage analysis and temporal validation
+- Model calibration and subgroup fairness testing
+- Outcome monitoring, drift detection, and human appeal processes
+
+- Geography, time of day, or telemetry must **never** independently prove fraud
+- SHAP contributions explain model influence — **not causation or guilt**
+- A real deployment requires access control, retention rules, and legal review
+
+---
+
+## Author
+
+**AASTHA381** · [github.com/AASTHA381](https://github.com/AASTHA381)
