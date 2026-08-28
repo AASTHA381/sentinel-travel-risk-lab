@@ -1,6 +1,7 @@
 import type { AnalystBrief, AssessmentResult, BookingRequest, GraphData, HealthStatus, ModelMetadata } from './types'
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'
+const API_ORIGIN = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+const API_BASE = `${API_ORIGIN}/api`
 
 const FIELD_LABELS: Record<string, string> = {
   body: 'Booking history',

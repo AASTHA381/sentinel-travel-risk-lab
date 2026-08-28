@@ -1,8 +1,8 @@
 services:
   # 1. Backend FastAPI Service
   - type: web
+    runtime: python
     name: sentinel-backend
-    env: python
     repo: https://github.com/AASTHA381/sentinel-travel-risk-lab
     branch: main
     rootDir: backend
@@ -11,15 +11,21 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: CORS_ALLOW_ORIGINS
+        fromService:
+          name: sentinel-frontend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
 
   # 2. Frontend React static site
-  - type: static
+  - type: web
+    runtime: static
     name: sentinel-frontend
     repo: https://github.com/AASTHA381/sentinel-travel-risk-lab
     branch: main
     rootDir: frontend
     buildCommand: npm install && npm run build
-    publishDir: dist
+    staticPublishPath: dist
     headers:
       - path: /*
         name: Access-Control-Allow-Origin
@@ -33,5 +39,7 @@ services:
       - key: VITE_API_URL
         fromService:
           name: sentinel-backend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
           type: web
           property: url

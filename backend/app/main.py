@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -22,9 +23,15 @@ app = FastAPI(
     version="0.1.0",
     description="Research prototype using synthetic data; not for production decisions.",
 )
+_default_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+_extra_origins = [
+    origin.strip()
+    for origin in os.environ.get("CORS_ALLOW_ORIGINS", "").split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=_default_origins + _extra_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
