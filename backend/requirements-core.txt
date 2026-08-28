@@ -1,0 +1,9 @@
+fastapi>=0.115,<1
+a2wsgi>=1.10,<2
+joblib>=1.4,<2
+numpy>=1.26,<3
+pandas>=2.2,<3
+pydantic>=2.10,<3
+scikit-learn>=1.5,<2
+uvicorn[standard]>=0.34,<1
+xgboost>=2.1,<4
