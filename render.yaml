@@ -41,5 +41,3 @@ services:
           name: sentinel-backend
           type: web
           envVarKey: RENDER_EXTERNAL_URL
-          type: web
-          property: url
