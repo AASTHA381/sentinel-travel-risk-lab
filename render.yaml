@@ -13,16 +13,16 @@ services:
         value: 3.11.0
 
   # 2. Frontend React static site
-  - type: web
+  - type: static
     name: sentinel-frontend
-    env: static
     repo: https://github.com/AASTHA381/sentinel-travel-risk-lab
     branch: main
     rootDir: frontend
     buildCommand: npm install && npm run build
     publishDir: dist
     headers:
-      - key: Access-Control-Allow-Origin
+      - path: /*
+        name: Access-Control-Allow-Origin
         value: "*"
     routes:
       # Support client-side routing fallback for React Single Page App
