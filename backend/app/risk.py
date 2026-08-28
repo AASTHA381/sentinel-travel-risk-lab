@@ -119,7 +119,7 @@ def assess_booking(booking: BookingAssessmentRequest) -> BookingAssessmentRespon
                 code=reason.code,
                 label=reason.label,
                 contribution=reason.contribution,
-                source="xgboost_shap",
+                source="model_feature_importance",
             )
             for reason in payment_prediction.reasons
         )
@@ -128,7 +128,7 @@ def assess_booking(booking: BookingAssessmentRequest) -> BookingAssessmentRespon
                 code=reason.code,
                 label=reason.label,
                 contribution=reason.contribution,
-                source="xgboost_shap",
+                source="model_feature_importance",
             )
             for reason in inventory_prediction.reasons
         )

@@ -26,7 +26,7 @@ export interface RiskReason {
   code: string
   label: string
   contribution: number
-  source: 'rule' | 'telemetry' | 'xgboost_shap'
+  source: 'rule' | 'telemetry' | 'model_feature_importance'
 }
 
 export interface ComponentScore {
