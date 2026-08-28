@@ -1,0 +1,37 @@
+services:
+  # 1. Backend FastAPI Service
+  - type: web
+    name: sentinel-backend
+    env: python
+    repo: https://github.com/AASTHA381/sentinel-travel-risk-lab
+    branch: main
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  # 2. Frontend React static site
+  - type: web
+    name: sentinel-frontend
+    env: static
+    repo: https://github.com/AASTHA381/sentinel-travel-risk-lab
+    branch: main
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    headers:
+      - key: Access-Control-Allow-Origin
+        value: "*"
+    routes:
+      # Support client-side routing fallback for React Single Page App
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: sentinel-backend
+          type: web
+          property: url
